@@ -8,4 +8,5 @@ This project uses the Python socket module to simulate communication between a c
 ## Credits
 - Lab 5 for for CIS 41B (Advanced Python Programming) at De Anza College, Spring 2023
 - Professor: Clare Nguyen
-- Author: Surajit A. Bose © 2023 
+- Author: Surajit A. Bose © 2023
+- Thanks: Edgar Aguilar, James Kang, Annie Luu
