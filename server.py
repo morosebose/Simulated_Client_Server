@@ -4,6 +4,9 @@ Surajit A. Bose
 Lab 5 Server
 '''
 
+# TODO: let server keep track of individual threads' current dir
+# TODO: handle file or directory names with spaces
+
 import socket
 import os
 import pickle
@@ -59,16 +62,15 @@ def createFile(cur_path, filename) :
     success = True
     try: 
         if os.path.isfile(filename) :
-            success = False
-        else :
-            f = open(filename, 'a')
-            f.close()
+            raise OSError
+        f = open(filename, 'a')
+        f.close()
     except OSError:
         success = False
     return cur_path, success
 
 
-def handleConnection(conn, addr, root_dir, name) :
+def handleConnection(conn, addr, root_dir) :
     '''
     Get and respond to client requests
     
@@ -78,6 +80,7 @@ def handleConnection(conn, addr, root_dir, name) :
     @param root_dir the directory where the server and client start out    
     @return None
     '''
+    name = threading.current_thread().name
     print(f'{name} connection to client at port: {PORT}, address: {addr}')
     fun_dict = {'c': changeDir, 'l' : listDir, 'f' : createFile}
     from_client = pickle.loads(conn.recv(1024))
@@ -110,9 +113,9 @@ def checkArgs(arg_list) :
         num = int(arg_list[1])
         timeout = int(arg_list[2])
         if not MIN_CLIENTS <= num <= MAX_CLIENTS :
-            invalid = 'Number of clients must be between 1 and 4'
+            invalid = f'Number of clients must be between {MIN_CLIENTS} and {MAX_CLIENTS}'
         elif not MIN_TIMEOUT <= timeout < MAX_TIMEOUT :
-            invalid = 'Timeout must be between 3 and 30 seconds'
+            invalid = f'Timeout must be between {MIN_TIMEOUT} and {MAX_TIMEOUT} seconds'
     except RuntimeError :
         invalid = 'Received too many command line arguments'
     except IndexError :
@@ -135,6 +138,9 @@ def main() :
         print('\tUsage: server.py number_of_clients timeout_in_seconds')
         print(f'\t{invalid}')
         raise SystemExit('\tPlease check command line arguments and try again')
+        
+    time_out = int(sys.argv[2])
+    max_allowed = int(sys.argv[1])
     
     with socket.socket() as to_me :
         root_dir = os.getcwd()
@@ -144,17 +150,16 @@ def main() :
         to_me.listen()
         threads = []
         names = ['First', 'Second', 'Third', 'Fourth']
-        
-        for i in range (int(sys.argv[1])) :
-            try :
+        try :
+            to_me.settimeout(time_out)
+            for i in range (max_allowed) :
                 cur_name = names[i]
-                to_me.settimeout(int(sys.argv[2]))
                 (conn, addr) = to_me.accept()
-                t = threading.Thread(target = handleConnection, args = (conn, addr, root_dir, cur_name), name = cur_name)
+                t = threading.Thread(target = handleConnection, args = (conn, addr, root_dir), name = cur_name)
                 threads.append(t)
                 t.start()
-            except socket.timeout :
-                print(f'{cur_name} connection timed out')
+        except socket.timeout :
+            print(f'Connection status: {max_allowed} allowed, {i} connected, {max_allowed - i} timed out')
         
         for t in threads: 
             t.join()

@@ -3,6 +3,7 @@ CIS 41B Spring 2023
 Surajit A. Bose
 Lab 5 Client
 '''
+# TODO: let server keep track of individual threads' current dir
 
 import socket
 import pickle
@@ -10,6 +11,7 @@ import pickle
 # Constants
 HOST = '127.0.0.1'  # IP address of client
 PORT = 5113         # Port at which to connect to server
+TIMEOUT = 3         # Timeout if server connection hangs
 
 def changeResult (recd) :
     '''
@@ -107,11 +109,16 @@ def main() :
     with socket.socket() as s :
         s.connect((HOST, PORT))
         print("Client connect to:", HOST, "port:", PORT)
-        s.send(pickle.dumps(['g']))
-        cur_dir = pickle.loads(s.recv(1024))
-        handleConnection(s, cur_dir)
+        try: 
+            s.settimeout(TIMEOUT)
+            s.send(pickle.dumps(['g']))
+            cur_dir = pickle.loads(s.recv(1024))
+            handleConnection(s, cur_dir)
     
-        print('Closed connection to server')
+            print('Closed connection to server')
+            
+        except socket.timeout :
+            print('Connection timed out')
         
 
 if __name__ == '__main__' :
