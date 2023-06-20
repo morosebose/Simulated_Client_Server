@@ -4,7 +4,9 @@ This project uses the Python socket module to simulate communication between a c
 - Sockets
 - Pickle
 - Threads
-- System modules (os, sys)
+- System modules
+    - os
+    - sys
 ## Credits
 - Lab 5 for for CIS 41B (Advanced Python Programming) at De Anza College, Spring 2023
 - Professor: Clare Nguyen
