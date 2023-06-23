@@ -114,7 +114,7 @@ def checkArgs(arg_list) :
         timeout = int(arg_list[2])
         if not MIN_CLIENTS <= num <= MAX_CLIENTS :
             invalid = f'Number of clients must be between {MIN_CLIENTS} and {MAX_CLIENTS}'
-        elif not MIN_TIMEOUT <= timeout < MAX_TIMEOUT :
+        elif not MIN_TIMEOUT <= timeout <= MAX_TIMEOUT :
             invalid = f'Timeout must be between {MIN_TIMEOUT} and {MAX_TIMEOUT} seconds'
     except RuntimeError :
         invalid = 'Received too many command line arguments'
@@ -135,7 +135,7 @@ def main() :
     '''
     invalid = checkArgs(sys.argv)
     if invalid :
-        print('\tUsage: server.py number_of_clients timeout_in_seconds')
+        print(f'\tUsage: {sys.argv[0]} number_of_clients timeout_in_seconds')
         print(f'\t{invalid}')
         raise SystemExit('\tPlease check command line arguments and try again')
         
